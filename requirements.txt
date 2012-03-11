@@ -5,5 +5,4 @@ simplejson==2.2.1
 wsgiref==0.1.2
 requests==0.10.4
 beautifulsoup4==4.0.0b10
-libxml2-python==2.6.21
 lxml==2.3.3
