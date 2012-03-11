@@ -1,1 +1,1 @@
-__all__ = ['BaseScraper', 'reddit']
+__all__ = ['BaseFetcher', 'reddit']

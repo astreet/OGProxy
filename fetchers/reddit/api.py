@@ -1,6 +1,9 @@
 from fetchers.BaseFetcher import BaseOGFetcher
 
-REDDIT_SERVER = 'http://www.reddit.com'
+REDDIT_SERVER = 'www.reddit.com'
+
+def is_image(uri):
+    return uri and uri.endswith(('jpg', 'png', 'gif', 'bmp'))
 
 class RedditAPIOGFetcher(BaseOGFetcher):
 
@@ -17,7 +20,7 @@ class RedditAPIOGFetcher(BaseOGFetcher):
         object_params = {}
         for access_tokens, tag_name in param_names.iteritems():
             value = self.json
-            for i in range(len(access_tokens)) > 0:
+            for i in range(len(access_tokens)):
                 token = access_tokens[i]
                 if type(value) is dict and value.has_key(token):
                     value = value[token]
@@ -32,20 +35,20 @@ class RedditAPIOGFetcher(BaseOGFetcher):
         return object_params
                 
 
-class RedditPostFetcher(BaseOGFetcher):
+class RedditPostFetcher(RedditAPIOGFetcher):
     
     def __init__(self, post_id):
         self.post_id = post_id
 
     def getParamNames(self):
         return {
-            ('data', 'children', 0, 'data', 'ups') => 'fbreddit:upvotes',
-            ('data', 'children', 0, 'data', 'downs') => 'fbreddit:downvotes',
-            ('data', 'children', 0, 'data', 'score') => 'fbreddit:score',
-            ('data', 'children', 0, 'data', 'title') => 'og:title',
-            ('data', 'children', 0, 'data', 'url') => 'fbreddit:content_url',
-            ('data', 'children', 0, 'data', 'thumbnail') => 'og:image',
-            ('data', 'children', 0, 'data', 'selftext') => 'og:description',
+            ('data', 'children', 0, 'data', 'ups'): 'fbreddit:upvotes',
+            ('data', 'children', 0, 'data', 'downs'): 'fbreddit:downvotes',
+            ('data', 'children', 0, 'data', 'score'): 'fbreddit:score',
+            ('data', 'children', 0, 'data', 'title'): 'og:title',
+            ('data', 'children', 0, 'data', 'url'): 'fbreddit:content_url',
+            ('data', 'children', 0, 'data', 'thumbnail'): 'og:image',
+            ('data', 'children', 0, 'data', 'selftext'): 'og:description',
         }
 
     def getAPIEndpoint(self):
@@ -53,7 +56,7 @@ class RedditPostFetcher(BaseOGFetcher):
 
     def getObjectParams(self):
         params = super(RedditPostFetcher, self).getObjectParams()
-        if not params.has_key('og:image') and is_image(params.get('fbreddit:content_url'):
+        if not params.has_key('og:image') and is_image(params.get('fbreddit:content_url')):
             params['og:image'] = params['fbreddit:content_url']
         return params
 

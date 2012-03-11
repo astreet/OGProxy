@@ -12,7 +12,7 @@ class FetcherError(Exception):
 
 class BaseOGFetcher(object):
 
-    def httpGet(server, path):
+    def httpGet(self, server, path):
         conn = httplib.HTTPConnection(server)
         conn.request('GET', path)
         response = conn.getresponse()
@@ -30,8 +30,8 @@ class BaseOGFetcher(object):
 
     def fetch(self):
         object_params = self.getObjectParams()
-        return render_template('og.html', object_params)
+        return render_template('og.html', object_params=object_params)
     
     def getObjectParams(self):
-        raise NotImplementedError('scrapeDOM must be implemented in base scraper classes')
+        raise NotImplementedError('getObjectParams must be implemented in base scraper classes')
 
