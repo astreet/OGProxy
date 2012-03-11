@@ -21,13 +21,17 @@ app.config.from_object('conf.Config')
 def handle_scrape_error(error):
     return 'Error scraping: ' + error.message, 500
 
-@app.route('/', methods=['GET'])
-def index():
-    uri = request.args.get('u', None)
-    if not uri:
-        abort(401)
+@app.route('/reddit/post/<post_id>', methods=['GET'])
+def post(username):
+    return RedditPostFetcher(post_id).fetch()
 
-    return handle_scrape(uri)
+@app.route('/reddit/user/<username>', methods=['GET'])
+def user(username):
+    return RedditUserFetcher(username).fetch()
+
+@app.route('/reddit/subreddit/<subreddit_name>', methods=['GET'])
+def user(username):
+    return RedditSubredditFetcher(subreddit_name).fetch()
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

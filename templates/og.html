@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:fb="http://ogp.me/ns/fb#" lang="en">
+  <head>
+    <meta content="288106721255039" property="fb:app_id" />
+  {% for name, value in object_params.iteritems() %}
+    <meta content="{{ value }}" property="{{ name }}" />
+  {% endfor %}
+    <meta http-equiv="refresh" content="0;url={{ object_params['fbreddit:content_url'] }}" />
+  </head>
+</html>
