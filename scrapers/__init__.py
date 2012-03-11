@@ -1,1 +1,1 @@
-__all__ = ['RedditScraper']
+__all__ = ['BaseScraper', 'reddit']

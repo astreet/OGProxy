@@ -17,7 +17,9 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.from_object('conf.Config')
 
-logger = app.logger
+@app.errorhandler(BaseScraper.ScraperError)
+def handle_scrape_error(error):
+    return 'Error scraping: ' + error.message, 500
 
 @app.route('/', methods=['GET'])
 def index():
