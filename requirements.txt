@@ -1,5 +1,6 @@
 Flask==0.8
-Flask-Cache>=0.4.0
+Flask-Cache==0.4.0
 Jinja2==2.6
 Werkzeug==0.8.3
 simplejson==2.2.1
+python-memcached==1.48
