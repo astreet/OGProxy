@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:fb="http://ogp.me/ns/fb#" lang="en">
   <head>
-    <meta content="288106721255039" property="fb:app_id" />
+    <meta property="fb:app_id" content="288106721255039" />
   {% for name, value in object_params.iteritems() %}
-    <meta content="{{ value }}" property="{{ name }}" />
+    <meta property="{{ name }}" content="{{ value }}" />
   {% endfor %}
-    <meta http-equiv="refresh" content="0;url={{ object_params['fbreddit:content_url'] }}" />
+  {% if object_params.has_key('fbreddit:link') %}
+    <meta http-equiv="refresh" content="500;url={{ object_params['fbreddit:link'] }}" />
+  {% endif %}
   </head>
 </html>

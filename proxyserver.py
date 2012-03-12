@@ -29,9 +29,9 @@ def post(post_id):
 def user(username):
     return RedditUserFetcher(username).fetch()
 
-@app.route('/reddit/subreddit/<subreddit_name>', methods=['GET'])
-def user(subreddit_name):
-    return RedditSubredditFetcher(subreddit_name).fetch()
+@app.route('/reddit/subreddit/<subreddit>', methods=['GET'])
+def subreddit(subreddit):
+    return RedditSubredditFetcher(subreddit).fetch()
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

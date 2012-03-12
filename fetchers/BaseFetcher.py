@@ -19,7 +19,7 @@ class BaseOGFetcher(object):
 
         if response.status != 200:
             conn.close()
-            error = '%s returned %d (%s)!' % (uri, response.status, response.reason)
+            error = '%s returned %d (%s)!' % (server + path, response.status, response.reason)
             logger.error(error)
             raise FetcherError(error)
 

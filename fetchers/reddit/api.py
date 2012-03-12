@@ -1,11 +1,35 @@
 from fetchers.BaseFetcher import BaseOGFetcher
+import flask
+from flask.logging import getLogger
+from logging import StreamHandler
+import re
+import simplejson as json
+from urlparse import urlparse
 
 REDDIT_SERVER = 'www.reddit.com'
+REDDIT_URI = 'http://' + REDDIT_SERVER
+PROXY_URI = 'http://ogproxy.herokuapp.com'
+
+logger = getLogger('reddit-api')
+logger.addHandler(StreamHandler())
 
 def is_image(uri):
     return uri and uri.endswith(('jpg', 'png', 'gif', 'bmp'))
 
+def is_imgur_single(uri):
+    if not uri:
+        return False
+
+    parsed = urlparse(uri)
+    if not (parsed.netloc == 'imgur.com' or parsed.netloc.endswith('.imgur.com')):
+        return False
+
+    return re.match('^/[^/]+$', parsed.path)
+
 class RedditAPIOGFetcher(BaseOGFetcher):
+
+    def getDefaultImage(self):
+        raise NotImplementedError('Must implement this!')
 
     def getParamNames(self):
         raise NotImplementedError('Must implement this!')
@@ -14,11 +38,15 @@ class RedditAPIOGFetcher(BaseOGFetcher):
         raise NotImplementedError('Must implement this!')
 
     def getObjectParams(self):
-        self.json = self.httpGet(REDDIT_SERVER, self.getAPIEndpoint())
+        self.json = json.loads(self.httpGet(REDDIT_SERVER, self.getAPIEndpoint()))
         param_names = self.getParamNames()
 
         object_params = {}
-        for access_tokens, tag_name in param_names.iteritems():
+        for tag_name, access_tokens in param_names.iteritems():
+            transform_function = (lambda v: v)
+            if type(access_tokens[0]) is tuple:
+                access_tokens, transform_function = access_tokens
+            
             value = self.json
             for i in range(len(access_tokens)):
                 token = access_tokens[i]
@@ -30,25 +58,47 @@ class RedditAPIOGFetcher(BaseOGFetcher):
                     value = None
                     break
             if value is not None and value != '':
-                object_params[tag_name] = value
+                object_params[tag_name] = transform_function(value)
+
+        if not object_params.has_key('og:image'):
+            object_params['og:image'] = self.getDefaultImage()
 
         return object_params
                 
 
 class RedditPostFetcher(RedditAPIOGFetcher):
-    
+
     def __init__(self, post_id):
         self.post_id = post_id
 
+    def getDefaultImage(self):
+        return 'http://www.redditstatic.com/over18.png'
+
     def getParamNames(self):
         return {
-            ('data', 'children', 0, 'data', 'ups'): 'fbreddit:upvotes',
-            ('data', 'children', 0, 'data', 'downs'): 'fbreddit:downvotes',
-            ('data', 'children', 0, 'data', 'score'): 'fbreddit:score',
-            ('data', 'children', 0, 'data', 'title'): 'og:title',
-            ('data', 'children', 0, 'data', 'url'): 'fbreddit:content_url',
-            ('data', 'children', 0, 'data', 'thumbnail'): 'og:image',
-            ('data', 'children', 0, 'data', 'selftext'): 'og:description',
+            'fbreddit:upvotes': ('data', 'children', 0, 'data', 'ups'),
+            'fbreddit:downvotes': ('data', 'children', 0, 'data', 'downs'),
+            'fbreddit:score': ('data', 'children', 0, 'data', 'score'),
+            'og:title': ('data', 'children', 0, 'data', 'title'),
+            'fbreddit:content_url': ('data', 'children', 0, 'data', 'url'),
+            'fbreddit:link': (
+                ('data', 'children', 0, 'data', 'permalink'),
+                lambda pl: REDDIT_URI + pl
+            ),
+            'og:image': ('data', 'children', 0, 'data', 'thumbnail'),
+            'og:description': ('data', 'children', 0, 'data', 'selftext'),
+            'og:url': (
+                ('data', 'children', 0, 'data', 'name'),
+                lambda p: PROXY_URI + flask.url_for('post', post_id=p)
+            ),
+            'fbreddit:author': (
+                ('data', 'children', 0, 'data', 'author'),
+                lambda u: PROXY_URI + flask.url_for('user', username=u),
+            ),
+            'fbreddit:subreddit': (
+                ('data', 'children', 0, 'data', 'subreddit'),
+                lambda s: PROXY_URI + flask.url_for('subreddit', subreddit=s),
+            ),
         }
 
     def getAPIEndpoint(self):
@@ -56,9 +106,71 @@ class RedditPostFetcher(RedditAPIOGFetcher):
 
     def getObjectParams(self):
         params = super(RedditPostFetcher, self).getObjectParams()
-        if not params.has_key('og:image') and is_image(params.get('fbreddit:content_url')):
-            params['og:image'] = params['fbreddit:content_url']
+        if params['og:image'] == self.getDefaultImage():
+            content_url = params.get('fbreddit:content_url')
+            if is_image(content_url):
+                params['og:image'] = content_url 
+            elif is_imgur_single(content_url):
+                params['og:image'] = content_url + '.png'
+                
         return params
 
 class RedditUserFetcher(RedditAPIOGFetcher):
-    pass
+
+    def __init__(self, username):
+        self.username = username
+
+    def getDefaultImage(self):
+        return 'http://redditstatic.s3.amazonaws.com/sobrave.png'
+
+    def getParamNames(self):
+        return {
+            'fbreddit:link_karma': ('data', 'link_karma'),
+            'fbreddit:comment_karma': ('data', 'comment_karma'),
+            'fbreddit:birthday': (
+                ('data', 'created_utc'),
+                lambda ts: int(ts)
+            ),
+            'og:title': ('data', 'name'),
+            'og:url': (
+                ('data', 'name'),
+                lambda u: PROXY_URI + flask.url_for('user', username=u),
+            ),
+            'fbreddit:link': (
+                ('data', 'name'),
+                lambda u: REDDIT_URI + '/user/' + u
+            ),
+        }
+
+    def getAPIEndpoint(self):
+        return '/user/%s/about.json' % (self.username)
+
+class RedditSubredditFetcher(RedditAPIOGFetcher):
+
+    def __init__(self, subreddit):
+        self.subreddit = subreddit 
+
+    def getDefaultImage(self):
+        return 'http://sp.reddit.com/160x160A.jpg'
+
+    def getParamNames(self):
+        return {
+            'og:description': ('data', 'description'),
+            'og:image': ('data', 'header_img'),
+            'og:title': (
+                ('data', 'display_name'),
+                lambda name: '/r/' + name,
+            ),
+            'og:url': (
+                ('data', 'display_name'),
+                lambda s: PROXY_URI + flask.url_for('subreddit', subreddit=s),
+            ),
+            'fbreddit:link': (
+                ('data', 'url'),
+                lambda url: REDDIT_URI + url
+            ),
+            'fbreddit:subscribers': ('data', 'subscribers'),
+        }
+
+    def getAPIEndpoint(self):
+        return '/r/%s/about.json' % (self.subreddit)
