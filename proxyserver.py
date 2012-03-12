@@ -5,6 +5,7 @@ import os
 import os.path
 import simplejson as json
 import urllib
+import pylibmc
 
 from flask import abort, Flask, request, redirect, render_template
 from flaskext.cache import Cache
