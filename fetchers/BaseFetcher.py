@@ -12,22 +12,6 @@ class FetcherError(Exception):
 
 class BaseOGFetcher(object):
 
-    def httpGet(self, server, path):
-        conn = httplib.HTTPConnection(server)
-        conn.request('GET', path)
-        response = conn.getresponse()
-
-        if response.status != 200:
-            conn.close()
-            error = '%s returned %d (%s)!' % (server + path, response.status, response.reason)
-            logger.error(error)
-            raise FetcherError(error)
-
-        r = response.read()
-        conn.close()
-
-        return r
-
     def fetch(self):
         object_params = self.getObjectParams()
         return render_template('og.html', object_params=object_params)

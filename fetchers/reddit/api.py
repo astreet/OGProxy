@@ -1,6 +1,8 @@
+import fetchers
 from fetchers.BaseFetcher import BaseOGFetcher
 import flask
 from flask.logging import getLogger
+import httplib
 from logging import StreamHandler
 import re
 import simplejson as json
@@ -12,6 +14,23 @@ PROXY_URI = 'http://ogproxy.herokuapp.com'
 
 logger = getLogger('reddit-api')
 logger.addHandler(StreamHandler())
+
+@fetchers.cache.memoize(timeout=1800)
+def http_get(server, path):
+    conn = httplib.HTTPConnection(server)
+    conn.request('GET', path)
+    response = conn.getresponse()
+
+    if response.status != 200:
+        conn.close()
+        error = '%s returned %d (%s)!' % (server + path, response.status, response.reason)
+        logger.error(error)
+        raise FetcherError(error)
+
+    r = response.read()
+    conn.close()
+
+    return r
 
 def is_image(uri):
     return uri and uri.endswith(('jpg', 'png', 'gif', 'bmp'))
@@ -41,7 +60,7 @@ class RedditAPIOGFetcher(BaseOGFetcher):
         raise NotImplementedError('Must implement this!')
 
     def getObjectParams(self):
-        self.json = json.loads(self.httpGet(REDDIT_SERVER, self.getAPIEndpoint()))
+        self.json = json.loads(http_get(REDDIT_SERVER, self.getAPIEndpoint()))
         param_names = self.getParamNames()
 
         object_params = {}

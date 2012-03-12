@@ -9,30 +9,31 @@ import urllib
 from flask import abort, Flask, request, redirect, render_template
 from flaskext.cache import Cache
 
-from fetchers import BaseFetcher
-from fetchers.reddit.api import *
-
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.from_object('conf.Config')
 cache = Cache(app)
+
+import fetchers
+from fetchers import BaseFetcher
+fetchers.app = app
+fetchers.cache = cache
+
+from fetchers.reddit.api import *
 
 @app.errorhandler(BaseFetcher.FetcherError)
 def handle_scrape_error(error):
     return 'Error fetching: ' + error.message, 500
 
 @app.route('/reddit/post/<post_id>', methods=['GET'])
-@cache.memoize(timeout=1800)
 def post(post_id):
     return RedditPostFetcher(post_id).fetch()
 
 @app.route('/reddit/user/<username>', methods=['GET'])
-@cache.memoize(timeout=10800)
 def user(username):
     return RedditUserFetcher(username).fetch()
 
 @app.route('/reddit/subreddit/<subreddit>', methods=['GET'])
-@cache.memoize(timeout=86400)
 def subreddit(subreddit):
     return RedditSubredditFetcher(subreddit).fetch()
 
