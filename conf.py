@@ -1,6 +1,5 @@
 import os
 
-
 class Config(object):
     DEBUG = True
     TESTING = False
@@ -8,3 +7,4 @@ class Config(object):
     FBAPI_SCOPE = ['user_likes', 'user_photos',
                    'user_photo_video_tags']
     FBAPI_APP_ID = os.environ.get('FACEBOOK_APP_ID')
+    CACHE_TYPE = 'memcached'
