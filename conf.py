@@ -13,3 +13,9 @@ class Config(object):
         password=os.environ.get('MEMCACHE_PASSWORD'),
         binary=True
     )
+#    CACHE_MEMCACHED_SERVER = [os.environ.get('MEMCACHE_SERVERS')]
+#    CACHE_OPTIONS = {
+#        'username': os.environ.get('MEMCACHE_USERNAME'),
+#        'password': os.environ.get('MEMCACHE_PASSWORD'),
+#        'binary': True
+#    }
