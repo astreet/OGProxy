@@ -28,6 +28,9 @@ def is_imgur_single(uri):
 
 class RedditAPIOGFetcher(BaseOGFetcher):
 
+    def getOGType(self):
+        raise NotImplementedError('Must implement this!')
+
     def getDefaultImage(self):
         raise NotImplementedError('Must implement this!')
 
@@ -63,6 +66,8 @@ class RedditAPIOGFetcher(BaseOGFetcher):
         if not object_params.has_key('og:image'):
             object_params['og:image'] = self.getDefaultImage()
 
+        object_params['og:type'] = self.getOGType()
+
         return object_params
                 
 
@@ -70,6 +75,9 @@ class RedditPostFetcher(RedditAPIOGFetcher):
 
     def __init__(self, post_id):
         self.post_id = post_id
+
+    def getOGType(self):
+        return 'fbreddit:post'
 
     def getDefaultImage(self):
         return 'http://www.redditstatic.com/over18.png'
@@ -120,6 +128,9 @@ class RedditUserFetcher(RedditAPIOGFetcher):
     def __init__(self, username):
         self.username = username
 
+    def getOGType(self):
+        return 'fbreddit:user'
+
     def getDefaultImage(self):
         return 'http://redditstatic.s3.amazonaws.com/sobrave.png'
 
@@ -149,6 +160,9 @@ class RedditSubredditFetcher(RedditAPIOGFetcher):
 
     def __init__(self, subreddit):
         self.subreddit = subreddit 
+
+    def getOGType(self):
+        return 'fbreddit:subreddit'
 
     def getDefaultImage(self):
         return 'http://sp.reddit.com/160x160A.jpg'
