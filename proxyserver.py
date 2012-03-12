@@ -6,8 +6,6 @@ import os.path
 import simplejson as json
 import urllib
 
-import requests
-
 from flask import abort, Flask, request, redirect, render_template
 
 from fetchers import BaseFetcher
