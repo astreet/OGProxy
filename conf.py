@@ -12,3 +12,4 @@ class Config(object):
         username=os.environ.get('MEMCACHE_USERNAME'),
         password=os.environ.get('MEMCACHE_PASSWORD'),
         binary=True
+    )
