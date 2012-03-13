@@ -37,6 +37,10 @@ def user(username):
 def subreddit(subreddit):
     return RedditSubredditFetcher(subreddit).fetch()
 
+@app.route('/reddit/comment/<post_id>/<comment_id>', methods=['GET'])
+def comment(post_id, comment_id):
+    return RedditCommentFetcher(post_id, comment_id).fetch()
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)

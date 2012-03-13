@@ -7,6 +7,22 @@ from logging import StreamHandler
 logger = getLogger('fetching')
 logger.addHandler(StreamHandler())
 
+def http_get(server, path):
+    conn = httplib.HTTPConnection(server)
+    conn.request('GET', path)
+    response = conn.getresponse()
+
+    if response.status != 200:
+        conn.close()
+        error = '%s returned %d (%s)!' % (server + path, response.status, response.reason)
+        logger.error(error)
+        raise FetcherError(error)
+
+    r = response.read()
+    conn.close()
+
+    return r
+
 class FetcherError(Exception):
     pass
 

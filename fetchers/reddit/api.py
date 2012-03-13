@@ -1,5 +1,5 @@
 import fetchers
-from fetchers.BaseFetcher import BaseOGFetcher
+from fetchers.BaseFetcher import BaseOGFetcher, http_get
 import flask
 from flask.logging import getLogger
 import httplib
@@ -16,21 +16,8 @@ logger = getLogger('reddit-api')
 logger.addHandler(StreamHandler())
 
 @fetchers.cache.memoize(timeout=1800)
-def http_get(server, path):
-    conn = httplib.HTTPConnection(server)
-    conn.request('GET', path)
-    response = conn.getresponse()
-
-    if response.status != 200:
-        conn.close()
-        error = '%s returned %d (%s)!' % (server + path, response.status, response.reason)
-        logger.error(error)
-        raise FetcherError(error)
-
-    r = response.read()
-    conn.close()
-
-    return r
+def cached_http_get(server, path):
+    return http_get(server, path)
 
 def is_image(uri):
     return uri and uri.endswith(('jpg', 'png', 'gif', 'bmp'))
@@ -44,6 +31,12 @@ def is_imgur_single(uri):
         return False
 
     return re.match('^/[^/]+$', parsed.path)
+
+def extract_image(s):
+    match = re.search('https?://[^/]+/.*\.(jpg|png|gif|bmp)', s)
+    if not match:
+        return None
+    return match.group(0)
 
 class RedditAPIOGFetcher(BaseOGFetcher):
 
@@ -60,7 +53,7 @@ class RedditAPIOGFetcher(BaseOGFetcher):
         raise NotImplementedError('Must implement this!')
 
     def getObjectParams(self):
-        self.json = json.loads(http_get(REDDIT_SERVER, self.getAPIEndpoint()))
+        self.json = json.loads(cached_http_get(REDDIT_SERVER, self.getAPIEndpoint()))
         param_names = self.getParamNames()
 
         object_params = {}
@@ -82,7 +75,7 @@ class RedditAPIOGFetcher(BaseOGFetcher):
             if value is not None and value != '':
                 object_params[tag_name] = transform_function(value)
 
-        if not object_params.has_key('og:image'):
+        if not object_params.has_key('og:image') or not is_image(object_params['og:image']):
             object_params['og:image'] = self.getDefaultImage()
 
         object_params['og:type'] = self.getOGType()
@@ -207,3 +200,54 @@ class RedditSubredditFetcher(RedditAPIOGFetcher):
 
     def getAPIEndpoint(self):
         return '/r/%s/about.json' % (self.subreddit)
+
+class RedditCommentFetcher(RedditAPIOGFetcher):
+
+    def __init__(self, post_id, comment_id):
+        self.post_id = post_id
+        self.cid = comment_id
+
+    def getOGType(self):
+        return 'fbreddit:comment'
+
+    def getDefaultImage(self):
+        return 'http://i.imgur.com/tH8Q5.png'
+
+    def getParamNames(self):
+        return {
+            'fbreddit:upvotes': (1, 'data', 'children', 0, 'data', 'ups'),
+            'fbreddit:downvotes': (1, 'data', 'children', 0, 'data', 'downs'),
+            'og:title': (
+                (1, 'data', 'children', 0, 'data', 'body'),
+                lambda t: t if len(t) < 50 else t[:47] + '...'
+            ),
+            'fbreddit:link': (
+                (),
+                lambda _: REDDIT_URI + '/comments/%s/466f7865732052756c65/%s' % (self.post_id, self.cid)
+            ),
+            'og:image': (
+                (1, 'data', 'children', 0, 'data', 'body'),
+                lambda b: extract_image(b)
+            ),
+            'og:description': (1, 'data', 'children', 0, 'data', 'body'),
+            'og:url': (
+                (),
+                lambda _: PROXY_URI + flask.url_for('comment', post_id=self.post_id, comment_id=self.cid)
+            ),
+            'fbreddit:author': (
+                (1, 'data', 'children', 0, 'data', 'author'),
+                lambda u: PROXY_URI + flask.url_for('user', username=u),
+            ),
+            'fbreddit:post': (
+                (),
+                lambda _: PROXY_URI + flask.url_for('post', post_id=self.post_id),
+            ),
+        }
+
+    def getAPIEndpoint(self):
+        return '/comments/%s/466f7865732052756c65/%s.json?limit=1' % (self.post_id, self.cid)
+
+    def getObjectParams(self):
+        params = super(RedditCommentFetcher, self).getObjectParams()
+        params['fbreddit:score'] = params['fbreddit:upvotes'] - params['fbreddit:downvotes']
+        return params
