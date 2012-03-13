@@ -2,7 +2,7 @@ import os
 import pylibmc
 
 class Config(object):
-    DEBUG = True 
+    DEBUG = False
     TESTING = False
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'DEBUG')
     FBAPI_APP_ID = os.environ.get('FACEBOOK_APP_ID')
