@@ -240,7 +240,7 @@ class RedditCommentFetcher(RedditAPIOGFetcher):
             ),
             'fbreddit:post': (
                 (),
-                lambda _: PROXY_URI + flask.url_for('post', post_id=self.post_id),
+                lambda _: PROXY_URI + flask.url_for('post', post_id=('t3_' + self.post_id),
             ),
         }
 
