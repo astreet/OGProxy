@@ -72,3 +72,12 @@ body {
 #love .get:active {
 	background: -webkit-linear-gradient(top, #999 0%, #aaa 100%);
 }
+
+#author {
+    font-family: verdana, sans-serif;
+    font-size: 11px;
+    color: #888;
+    position: fixed;
+    bottom: 1px;
+    right: 3px;
+}

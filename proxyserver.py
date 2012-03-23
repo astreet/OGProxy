@@ -41,8 +41,9 @@ def subreddit(subreddit):
 def comment(post_id, comment_id):
     return RedditCommentFetcher(post_id, comment_id).fetch()
 
-@app.route('/'):
-	redirect('/static/index.html')
+@app.route('/')
+def index():
+	return redirect('/static/index.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
