@@ -1,18 +1,18 @@
 <html>
 	<head>
-		<link rel="stylesheet" type="text/css" href="love.css" />
-		<script type="text/javascript" src="fb-all.js" />
-		<script type="text/javascript">
-			FB.init({
-			    appId      : '288106721255039',
-			    status     : true,
-			    cookie     : true,
-			    xfbml      : true,
-			    oauth      : true,
-			  });
-		</script>
+		<link rel="stylesheet" type="text/css" href="love.css"></link>
 	</head>
 	<body>
+		<div id="fb-root"></div>
+		<script>
+			(function(d, s, id) {
+			  var js, fjs = d.getElementsByTagName(s)[0];
+			  if (d.getElementById(id)) return;
+			  js = d.createElement(s); js.id = id;
+			  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=288106721255039";
+			  fjs.parentNode.insertBefore(js, fjs);
+			}(document, 'script', 'facebook-jssdk'));
+		</script>
 		<div id="love">
 			<div class="eqContainer">
 				<a class="alien" href="http://www.reddit.com"></a>
@@ -22,8 +22,6 @@
 			<a class="get" href="https://www.facebook.com/download/180083442110202/extension.crx"><img src="chrome.png"></img>Get the extension</a>
 		</div>
         <div id="author">andrews@fb</div>
-        <div id="fb-root">
-			<div class="fb-add-to-timeline" data-show-faces="true" data-mode="button"></div>
-        </div>
+        <div class="fb-add-to-timeline" data-show-faces="true" data-mode="button"></div>
 	</body>
 </html>

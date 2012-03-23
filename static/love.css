@@ -81,3 +81,7 @@ body {
     bottom: 1px;
     right: 3px;
 }
+
+.fb-add-to-timeline {
+	margin: 30px auto 0 auto;
+}
