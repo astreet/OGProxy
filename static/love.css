@@ -1,0 +1,74 @@
+body {
+	background-image: url('texture.png');
+}
+
+#love {
+	margin: 50px auto 0 auto;
+	height: 300px;
+	background-image: url('texture-light.png');
+	padding: 40px;
+	width: 600px;
+	-webkit-box-shadow: 0 0 10px #222;
+	-webkit-border-radius: 25px;
+}
+
+#love .eqContainer {
+	margin: -30px auto 0 auto;
+	width: 557px;
+}
+
+#love .eq {
+	font-size: 100px;
+	font-weight: bold;
+    vertical-align: top;
+    display: inline-block;
+    margin-top: 100px;
+}
+
+#love .alien {
+	background-image: url('reddit.png');
+	display: inline-block;
+	height: 260px;
+	width: 200px;
+	background-size: 200px 260px;
+	cursor: pointer;
+	margin: 15px 15px 0 25px;
+}
+
+#love .og {
+	background-image: url('https://developers.facebook.com/attachment/OGP-big.png');
+	display: inline-block;
+	width: 230px;
+	height: 190px;
+	background-size: 230px;
+	margin-top: 70px;
+	margin-left: 10px;
+	vertical-align: top;
+}
+
+#love .get {
+	width: 181px;
+	margin: 20px auto 0 auto;
+	display: block;
+	text-decoration: none;
+	font-family: verdana, sans-serif;
+	color: #333;
+	background: -webkit-linear-gradient(top, #aaa 0%, #999 100%);
+	padding: 0 5px 0 10px;
+	border: 1px solid #444;
+	-webkit-border-radius: 5px;
+	-webkit-box-shadow: 0 0 2px #222;	
+    vertical-align: 50%;
+    line-height: 39px;
+}
+
+#love .get img {
+	width: 25px;
+	margin-right: 6px;
+    float: left;
+    margin-top: 7px;
+}
+
+#love .get:active {
+	background: -webkit-linear-gradient(top, #999 0%, #aaa 100%);
+}
