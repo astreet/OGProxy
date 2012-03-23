@@ -105,6 +105,7 @@ body {
     -webkit-box-shadow: 0 0 5px #333;
     border: 1px solid #333;
     -webkit-transition: right .3s;
+    max-height: 100px;
 }
 
 #addContainer:hover {
