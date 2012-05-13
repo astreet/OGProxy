@@ -92,7 +92,7 @@ class RedditPostFetcher(RedditAPIOGFetcher):
         return 'fbreddit:post'
 
     def getDefaultImage(self):
-        return 'http://www.redditstatic.com/over18.png'
+        return 'http://2.bp.blogspot.com/-otxHec_ptYA/Txi3lYGCceI/AAAAAAAAAOg/xrSjvqUpjas/s1600/reddit-alien-blackout.png'
 
     def getParamNames(self):
         return {
