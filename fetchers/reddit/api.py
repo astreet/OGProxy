@@ -61,7 +61,7 @@ class RedditAPIOGFetcher(BaseOGFetcher):
             transform_function = (lambda v: v)
             if type(access_tokens[0]) is tuple:
                 access_tokens, transform_function = access_tokens
-            
+
             value = self.json
             for i in range(len(access_tokens)):
                 token = access_tokens[i]
@@ -81,7 +81,6 @@ class RedditAPIOGFetcher(BaseOGFetcher):
         object_params['og:type'] = self.getOGType()
 
         return object_params
-                
 
 class RedditPostFetcher(RedditAPIOGFetcher):
 
@@ -126,13 +125,12 @@ class RedditPostFetcher(RedditAPIOGFetcher):
 
     def getObjectParams(self):
         params = super(RedditPostFetcher, self).getObjectParams()
-        if params['og:image'] == self.getDefaultImage():
-            content_url = params.get('fbreddit:content_url')
-            if is_image(content_url):
-                params['og:image'] = content_url 
-            elif is_imgur_single(content_url):
-                params['og:image'] = content_url + '.png'
-                
+        content_url = params.get('fbreddit:content_url')
+        if is_image(content_url):
+            params['og:image'] = content_url
+        elif is_imgur_single(content_url):
+            params['og:image'] = content_url + '.png'
+
         return params
 
 class RedditUserFetcher(RedditAPIOGFetcher):
@@ -171,7 +169,7 @@ class RedditUserFetcher(RedditAPIOGFetcher):
 class RedditSubredditFetcher(RedditAPIOGFetcher):
 
     def __init__(self, subreddit):
-        self.subreddit = subreddit 
+        self.subreddit = subreddit
 
     def getOGType(self):
         return 'fbreddit:subreddit'
